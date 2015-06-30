@@ -16,6 +16,7 @@ import com.parse.ParseUser;
 
 
 public class MainActivity extends FragmentActivity {
+    //이것 또한 Slack 추가
 
     private final String PARSE_APPLICATION_ID = "ch68mVW8T9mWjkm14MQqbXVzX8fzI9uuNwSubY53";
     private final String PARSE_CLIENT_KEY = "9PZBYzBJZH96Ou1M9ACV7m91GeKPfoZ92Lrps1VG";

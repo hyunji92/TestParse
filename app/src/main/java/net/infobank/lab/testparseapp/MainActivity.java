@@ -1,125 +1,88 @@
 package net.infobank.lab.testparseapp;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import com.astuetz.PagerSlidingTabStrip;
 import com.parse.Parse;
 import com.parse.ParseACL;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
-import java.util.ArrayList;
+
+public class MainActivity extends FragmentActivity {
+
+    private final String PARSE_APPLICATION_ID = "ch68mVW8T9mWjkm14MQqbXVzX8fzI9uuNwSubY53";
+    private final String PARSE_CLIENT_KEY = "9PZBYzBJZH96Ou1M9ACV7m91GeKPfoZ92Lrps1VG";
 
 
-public class MainActivity extends ActionBarActivity implements View.OnClickListener {
+    private PagerSlidingTabStrip slidingTabStrip;
+    private ViewPager mViewPager;            // View pager를 지칭할 변수
 
-    //private final String PARSE_APPLICATION_ID = "ch68mVW8T9mWjkm14MQqbXVzX8fzI9uuNwSubY53";
-    //private final String PARSE_CLIENT_KEY = "9PZBYzBJZH96Ou1M9ACV7m91GeKPfoZ92Lrps1VG";
-
-    private Button mAddData;
-    private Button mLoadData;
-    private TextView mData;
+    private String[] tabTitle = {"type1", "type2", "type3"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        slidingTabStrip = (PagerSlidingTabStrip) this.findViewById(R.id.tabs);
+        mViewPager = (ViewPager) this.findViewById(R.id.view_pager);
+
+        ParsePagerAdapter parsePagerAdapter = new ParsePagerAdapter(getSupportFragmentManager());
+        mViewPager.setAdapter(parsePagerAdapter);
+        slidingTabStrip.setViewPager(mViewPager);
+
+
         // Enable Local Datastore.
         Parse.enableLocalDatastore(this);
-
-        Parse.initialize(this, "ch68mVW8T9mWjkm14MQqbXVzX8fzI9uuNwSubY53", "9PZBYzBJZH96Ou1M9ACV7m91GeKPfoZ92Lrps1VG");
+        Parse.initialize(this, PARSE_APPLICATION_ID, PARSE_CLIENT_KEY);
         ParseUser.enableAutomaticUser();
         ParseACL defaultACL = new ParseACL();
         ParseACL.setDefaultACL(defaultACL, true);
-// client에서 class를 만들 경우, ParseObject를 만들고 save하면 parse.com에 자동으로 해당 class가 추가
-//        ParseObject testObject = new ParseObject("TestObject");
-//        testObject.put("foo", "bar");
-//        testObject.saveInBackground();
 
-        mData = (TextView) findViewById(R.id.textView);
 
-        mAddData = (Button) findViewById(R.id.button);
-        mLoadData = (Button) findViewById(R.id.button2);
-
-        mAddData.setOnClickListener(this);
-        mLoadData.setOnClickListener(this);
     }
 
+    class ParsePagerAdapter extends FragmentPagerAdapter {
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.button:
-                saveData();
-                break;
-            case R.id.button2:
-                loadData();
-                break;
+        public ParsePagerAdapter(FragmentManager fm) {
+            super(fm);
         }
 
-    }
+        @Override
+        public Fragment getItem(int position) {
 
-    private void saveData() {
-        try {
-            ParseACL defaultACL = new ParseACL();
-            defaultACL.setPublicReadAccess(true); // 해당 데이터에 대한 접근 권한을 모든 사람이 읽을 수 있도록 합니다.
-            ParseObject data1 = new ParseObject("testDatas"); // object 생성 및 추가될 class 이름 입력
-            data1.put("test_type", 1); // 데이터 입력
-            data1.put("test_message", "첫번째 데이터 입니다."); // 데이터 입력
-            data1.setACL(defaultACL); // object에 ACL set
-            data1.save(); // parse.com에 해당 object save
-
-
-            ParseObject data2 = new ParseObject("testDatas"); // object 생성 및 추가될 class 이름 입력
-            data2.put("test_type", 2); // 데이터 입력
-            data2.put("test_message", "두번째 데이터 입니다."); // 데이터 입력
-            data2.setACL(defaultACL); // object에 ACL set
-            data2.save(); // parse.com에 해당 object save
-
-
-            ParseObject data3 = new ParseObject("testDatas"); // object 생성 및 추가될 class 이름 입력
-            data3.put("test_type", 3); // 데이터 입력
-            data3.put("test_message", "두번째 데이터 입니다."); // 데이터 입력
-            data3.setACL(defaultACL); // object에 ACL set
-            data3.save(); // parse.com에 해당 object save
-            Toast.makeText(this, "입력이 완료 되었습니다.", Toast.LENGTH_SHORT).show();
-
-        } catch (com.parse.ParseException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loadData() {
-        try {
-            ArrayList<ParseObject> datas = new ArrayList<ParseObject>(); // parse.com에서 읽어온 object들을 저장할 List
-            ParseQuery<ParseObject> query = ParseQuery.getQuery("testDatas"); // 서버에 mydatas class 데이터 요청
-            //query.whereEqualTo("test_type", 1); // my_type이 1인 object만 읽어옴. 해당 함수 호출하지 않으면 class의 모든 데이터를 읽어옴.
-            datas.addAll(query.find()); // 읽어온 데이터를 List에 저장
-            // 읽어온 데이터를 화면에 보여주기 위한 처리
-            StringBuffer str = new StringBuffer();
-            for (ParseObject object : datas) {
-                str.append("ObjectId: ");
-                str.append(object.getObjectId());
-                str.append("\n");
-                str.append("test_type: ");
-                str.append(object.get("test_type"));
-                str.append(", ");
-                str.append("test_message: ");
-                str.append(object.get("test_message"));
-                str.append("\n\n");
+            Fragment f;
+            switch (position) {
+                case 0:
+                    f = FragmentA.newInstance("");
+                    break;
+                case 1:
+                    f = FragmentB.newInstance("");
+                    break;
+                case 2:
+                    f = FragmentC.newInstance("");
+                    break;
+                default:
+                    throw new IllegalArgumentException("not this many fragments: " + position);
             }
-            mData.setText(str.toString()); // TextView에 데이터를 넣어준다.
-            datas.clear();
+            return f;
 
-        } catch (com.parse.ParseException e) {
-            e.printStackTrace();
+        }
+
+        @Override
+        public int getCount() {
+            return tabTitle.length;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return tabTitle[position % tabTitle.length].toUpperCase();
         }
     }
 
@@ -144,4 +107,5 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         return super.onOptionsItemSelected(item);
     }
+
 }

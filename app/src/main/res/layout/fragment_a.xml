@@ -6,14 +6,30 @@
     android:background="#dd5566">
 
 
-    <Button
-        android:id="@+id/button_a"
-        android:layout_width="wrap_content"
+    <EditText
+        android:id="@+id/name_edittext"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/button2"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="81dp"
-        android:text="Add Data" />
+        android:hint="빌리시는 분의 성함을 입력하세요 . "/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <Button
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="입력"/>
+        <Button
+            android:id="@+id/button_a"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/button2"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="81dp"
+            android:text="Add Data" />
+        </LinearLayout>
 
     <Button
         android:id="@+id/button2_a"

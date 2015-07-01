@@ -14,6 +14,10 @@ import com.parse.Parse;
 import com.parse.ParseACL;
 import com.parse.ParseUser;
 
+import net.infobank.lab.testparseapp.fragment.FragmentA;
+import net.infobank.lab.testparseapp.fragment.FragmentB;
+import net.infobank.lab.testparseapp.fragment.FragmentC;
+
 
 public class MainActivity extends FragmentActivity {
     //이것 또한 Slack 추가
@@ -25,7 +29,7 @@ public class MainActivity extends FragmentActivity {
     private PagerSlidingTabStrip slidingTabStrip;
     private ViewPager mViewPager;            // View pager를 지칭할 변수
 
-    private String[] tabTitle = {"type1", "type2", "type3"};
+    private String[] tabTitle = {" 단말 대여 ", " 단말 반납 ", " 대여 현황 "};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

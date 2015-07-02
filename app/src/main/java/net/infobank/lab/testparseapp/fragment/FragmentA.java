@@ -52,7 +52,7 @@ public class FragmentA extends Fragment implements View.OnClickListener {
         mLoadData1 = (Button) view.findViewById(R.id.button2_a);
         mData1 = (TextView) view.findViewById(R.id.textView_a);
         mName = (EditText) view.findViewById(R.id.name_edittext);
-        mNamePutButton = (Button) view.findViewById(R.id.name);
+        mNamePutButton = (Button) view.findViewById(R.id.name_button);
 
         mAddData1.setOnClickListener(this);
         mLoadData1.setOnClickListener(this);
@@ -73,7 +73,7 @@ public class FragmentA extends Fragment implements View.OnClickListener {
             data1.put("rent_name", putName); // 데이터 입력
             data1.put("rent_date", str); // 데이터 입력
             data1.setACL(defaultACL); // object에 ACL set
-            data1.save(); // parse.com에 해당 object save
+            data1.save(); // parse.com에 해당 object save  n
             Toast.makeText(getActivity(), "입력이 완료 되었습니다.", Toast.LENGTH_SHORT).show();
 
         } catch (com.parse.ParseException e) {
@@ -118,7 +118,7 @@ public class FragmentA extends Fragment implements View.OnClickListener {
             case R.id.button2_a:
                 loadData();
                 break;
-            case R.id.name:
+            case R.id.name_button:
 
                  putName = mName.getText().toString();
                 break;

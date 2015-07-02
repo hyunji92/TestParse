@@ -10,8 +10,8 @@
     <com.astuetz.PagerSlidingTabStrip
         android:id="@+id/tabs"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        app:pstsTabPaddingLeftRight="40dp"
+        android:layout_height="60dp"
+        app:pstsTabPaddingLeftRight="20dp"
         app:paddingEnd="5dp"
         app:pstsIndicatorColor="#FF33B5E6"
         app:pstsUnderlineColor="#ff3333" />

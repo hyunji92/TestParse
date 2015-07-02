@@ -17,6 +17,7 @@ import com.parse.ParseUser;
 import net.infobank.lab.testparseapp.fragment.FragmentA;
 import net.infobank.lab.testparseapp.fragment.FragmentB;
 import net.infobank.lab.testparseapp.fragment.FragmentC;
+import net.infobank.lab.testparseapp.fragment.PhoneListFragment;
 
 
 public class MainActivity extends FragmentActivity {
@@ -29,7 +30,7 @@ public class MainActivity extends FragmentActivity {
     private PagerSlidingTabStrip slidingTabStrip;
     private ViewPager mViewPager;            // View pager를 지칭할 변수
 
-    private String[] tabTitle = {" 단말 대여 ", " 단말 반납 ", " 대여 현황 "};
+    private String[] tabTitle = {" 단말 목록 "," 단말 대여 ", " 단말 반납 ", " 대여 현황 "};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +66,15 @@ public class MainActivity extends FragmentActivity {
             Fragment f;
             switch (position) {
                 case 0:
-                    f = FragmentA.newInstance("");
+                    f = PhoneListFragment.newInstance("");
                     break;
                 case 1:
-                    f = FragmentB.newInstance("");
+                    f = FragmentA.newInstance("");
                     break;
                 case 2:
+                    f = FragmentB.newInstance("");
+                    break;
+                case 3:
                     f = FragmentC.newInstance("");
                     break;
                 default:

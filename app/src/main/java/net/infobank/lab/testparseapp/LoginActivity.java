@@ -3,8 +3,12 @@ package net.infobank.lab.testparseapp;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorActivity;
 import android.accounts.AccountManager;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,6 +22,9 @@ import android.widget.EditText;
 import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPException;
 
+import net.infobank.lab.testparseapp.client.LDAPServerInstance;
+import net.infobank.lab.testparseapp.client.LDAPUtilities;
+
 import java.util.Properties;
 
 /**
@@ -25,6 +32,8 @@ import java.util.Properties;
  */
 public class LoginActivity extends AccountAuthenticatorActivity implements View.OnClickListener {
 
+    private static final int ERROR_DIALOG = 1;
+    private static final int PROGRESS_DIALOG = 0;
     public static final String PARAM_CONFIRMCREDENTIALS = "confirmCredentials";
     public static final String PARAM_USEREMAIL = "useremail";
     public static final String PARAM_PASSWORD = "password";
@@ -73,6 +82,10 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
     private int mEncryption;
     private int mPort;
     private final int port = 389;
+
+    private Dialog dialog;
+    private String message;
+
     //private LDAPConnection ldapConnection;
 
     //LDAP Context
@@ -223,7 +236,100 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
         finish();
     }
 
+    /**
+     * Handles onClick event on the Next button. Sends username/password to the server for authentication.
+     *
+     * @param view The Next button for which this method is invoked
+     */
+    public void getLDAPServerDetails(View view) {
+        Log.i(TAG, "handleLogin");
 
+        try {
 
+        } catch (NumberFormatException nfe) {
+            Log.i(TAG, "No port given. Set port to 389");
+            mPort = 389;
+        }
+
+        LDAPServerInstance ldapServer = new LDAPServerInstance(mHost, mPort, mEncryption, mIbEmail, mIbPassword);
+
+        showDialog(PROGRESS_DIALOG);
+        // Start authenticating...
+        mAuthThread = LDAPUtilities.attemptAuth(ldapServer, mHandler, LoginActivity.this);
+    }
+
+    /**
+     * Call back for the authentication process. When the authentication attempt is finished this method is called.
+     *
+     * @param baseDNs List of baseDNs from the LDAP server
+     * @param result  result of the authentication process
+     * @param message Possible error message
+     */
+    public void onAuthenticationResult(String[] baseDNs, boolean result, String message) {
+        Log.i(TAG, "onAuthenticationResult(" + result + ")");
+        if (dialog != null) {
+            dialog.dismiss();
+        }
+        this.message = message;
+        showDialog(ERROR_DIALOG);
+        Log.e(TAG, "onAuthenticationResult: failed to authenticate");
+    }
+    /**
+     * Handles onClick event on the Done button. Saves the account with the account manager.
+     *
+     * @param view
+     *            The Done button for which this method is invoked
+     */
+    public void saveAccount(View view) {
+        String searchFilter = mSearchFilter;
+        String baseDN = mBaseDN;
+        String firstName = mFirstName;
+        String lastName = mLastName;
+
+        if (!mConfirmCredentials) {
+            finishLogin();
+        } else {
+            finishConfirmCredentials(true);
+        }
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        if (id == PROGRESS_DIALOG) {
+            final ProgressDialog dialog = new ProgressDialog(this);
+            dialog.setMessage("인증중");
+            dialog.setIndeterminate(true);
+            dialog.setCancelable(true);
+            dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                public void onCancel(DialogInterface dialog) {
+                    Log.i(TAG, "dialog cancel has been invoked");
+                    if (mAuthThread != null) {
+                        mAuthThread.interrupt();
+                        finish();
+                    }
+                }
+            });
+            this.dialog = dialog;
+            return dialog;
+        } else if (id == ERROR_DIALOG) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Connection error").setMessage("Could not connect to the server:\n" + message).setCancelable(false);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            });
+            AlertDialog alert = builder.create();
+            return alert;
+        }
+        return null;
+    }
+
+    @Override
+    protected void onPrepareDialog(int id, Dialog dialog) {
+        if (id == ERROR_DIALOG) {
+            ((AlertDialog) dialog).setMessage("Could not connect to the server:\n" + message);
+        }
+    }
 
 }

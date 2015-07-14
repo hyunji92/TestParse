@@ -25,9 +25,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import de.danielweisser.android.ldapsync.Constants;
-import de.danielweisser.android.ldapsync.client.LDAPServerInstance;
-import de.danielweisser.android.ldapsync.client.LDAPUtilities;
+import net.infobank.lab.testparseapp.Constants;
+import net.infobank.lab.testparseapp.LoginActivity;
+import net.infobank.lab.testparseapp.client.LDAPServerInstance;
+import net.infobank.lab.testparseapp.client.LDAPUtilities;
 
 /**
  * This class is an implementation of AbstractAccountAuthenticator for authenticating accounts in the de.danielweisser.android.ldapsync domain.
@@ -48,8 +49,8 @@ class LDAPAuthenticator extends AbstractAccountAuthenticator {
 	@Override
 	public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) {
 		Log.i(TAG, "addAccount()");
-		final Intent intent = new Intent(mContext, LDAPAuthenticatorActivity.class);
-		intent.putExtra(LDAPAuthenticatorActivity.PARAM_AUTHTOKEN_TYPE, authTokenType);
+		final Intent intent = new Intent(mContext, LoginActivity.class);
+		intent.putExtra(LoginActivity.PARAM_AUTHTOKEN_TYPE, authTokenType);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 		final Bundle bundle = new Bundle();
 		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
@@ -61,10 +62,10 @@ class LDAPAuthenticator extends AbstractAccountAuthenticator {
 		if (options != null && options.containsKey(AccountManager.KEY_PASSWORD)) {
 			final String password = options.getString(AccountManager.KEY_PASSWORD);
 			final AccountManager am = AccountManager.get(mContext);
-			final String host = am.getUserData(account, LDAPAuthenticatorActivity.PARAM_HOST);
-			final String username = am.getUserData(account, LDAPAuthenticatorActivity.PARAM_USERNAME);
-			final int port = Integer.parseInt(am.getUserData(account, LDAPAuthenticatorActivity.PARAM_PORT));
-			final int encryption = Integer.parseInt(am.getUserData(account, LDAPAuthenticatorActivity.PARAM_ENCRYPTION));
+			final String host = am.getUserData(account, LoginActivity.PARAM_HOST);
+			final String username = am.getUserData(account, LoginActivity.PARAM_USERNAME);
+			final int port = Integer.parseInt(am.getUserData(account, LoginActivity.PARAM_PORT));
+			final int encryption = Integer.parseInt(am.getUserData(account, LoginActivity.PARAM_ENCRYPTION));
 			LDAPServerInstance ldapServer = new LDAPServerInstance(host, port, encryption, username, password);
 
 			final boolean verified = onlineConfirmPassword(ldapServer);
@@ -73,9 +74,9 @@ class LDAPAuthenticator extends AbstractAccountAuthenticator {
 			return result;
 		}
 		// Launch AuthenticatorActivity to confirm credentials
-		final Intent intent = new Intent(mContext, LDAPAuthenticatorActivity.class);
+		final Intent intent = new Intent(mContext, LoginActivity.class);
 		// intent.putExtra(LDAPAuthenticatorActivity.PARAM_USERNAME, account.name);
-		intent.putExtra(LDAPAuthenticatorActivity.PARAM_CONFIRMCREDENTIALS, true);
+		intent.putExtra(LoginActivity.PARAM_CONFIRMCREDENTIALS, true);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 		final Bundle bundle = new Bundle();
 		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
@@ -96,10 +97,10 @@ class LDAPAuthenticator extends AbstractAccountAuthenticator {
 		}
 		final AccountManager am = AccountManager.get(mContext);
 		final String password = am.getPassword(account);
-		final String host = am.getUserData(account, LDAPAuthenticatorActivity.PARAM_HOST);
-		final String username = am.getUserData(account, LDAPAuthenticatorActivity.PARAM_USERNAME);
-		final int port = Integer.parseInt(am.getUserData(account, LDAPAuthenticatorActivity.PARAM_PORT));
-		final int encryption = Integer.parseInt(am.getUserData(account, LDAPAuthenticatorActivity.PARAM_ENCRYPTION));
+		final String host = am.getUserData(account, LoginActivity.PARAM_HOST);
+		final String username = am.getUserData(account, LoginActivity.PARAM_USERNAME);
+		final int port = Integer.parseInt(am.getUserData(account, LoginActivity.PARAM_PORT));
+		final int encryption = Integer.parseInt(am.getUserData(account, LoginActivity.PARAM_ENCRYPTION));
 		LDAPServerInstance ldapServer = new LDAPServerInstance(host, port, encryption, username, password);
 		if (password != null) {
 			final boolean verified = onlineConfirmPassword(ldapServer);
@@ -112,9 +113,9 @@ class LDAPAuthenticator extends AbstractAccountAuthenticator {
 		}
 		// the password was missing or incorrect, return an Intent to an
 		// Activity that will prompt the user for the password.
-		final Intent intent = new Intent(mContext, LDAPAuthenticatorActivity.class);
-		intent.putExtra(LDAPAuthenticatorActivity.PARAM_USERNAME, username);
-		intent.putExtra(LDAPAuthenticatorActivity.PARAM_AUTHTOKEN_TYPE, authTokenType);
+		final Intent intent = new Intent(mContext, LoginActivity.class);
+		intent.putExtra(LoginActivity.PARAM_USERNAME, username);
+		intent.putExtra(LoginActivity.PARAM_AUTHTOKEN_TYPE, authTokenType);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 		final Bundle bundle = new Bundle();
 		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
@@ -137,10 +138,10 @@ class LDAPAuthenticator extends AbstractAccountAuthenticator {
 
 	@Override
 	public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle loginOptions) {
-		final Intent intent = new Intent(mContext, LDAPAuthenticatorActivity.class);
-		intent.putExtra(LDAPAuthenticatorActivity.PARAM_USERNAME, account.name);
-		intent.putExtra(LDAPAuthenticatorActivity.PARAM_AUTHTOKEN_TYPE, authTokenType);
-		intent.putExtra(LDAPAuthenticatorActivity.PARAM_CONFIRMCREDENTIALS, false);
+		final Intent intent = new Intent(mContext, LoginActivity.class);
+		intent.putExtra(LoginActivity.PARAM_USERNAME, account.name);
+		intent.putExtra(LoginActivity.PARAM_AUTHTOKEN_TYPE, authTokenType);
+		intent.putExtra(LoginActivity.PARAM_CONFIRMCREDENTIALS, false);
 		final Bundle bundle = new Bundle();
 		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
 		return bundle;

@@ -19,13 +19,9 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.unboundid.ldap.sdk.LDAPConnection;
-import com.unboundid.ldap.sdk.LDAPException;
-
+import net.infobank.lab.testparseapp.client.Contact;
 import net.infobank.lab.testparseapp.client.LDAPServerInstance;
 import net.infobank.lab.testparseapp.client.LDAPUtilities;
-
-import java.util.Properties;
 
 /**
  * Created by chunghj on 15. 7. 7..
@@ -35,19 +31,22 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
     private static final int ERROR_DIALOG = 1;
     private static final int PROGRESS_DIALOG = 0;
     public static final String PARAM_CONFIRMCREDENTIALS = "confirmCredentials";
-    public static final String PARAM_USEREMAIL = "useremail";
-    public static final String PARAM_PASSWORD = "password";
     public static final String PARAM_HOST = "host";
     public static final String PARAM_PORT = "port";
+
+    //사용자 조회위한 사용자 계정 , 사용자 계정 PW
+    public static final String PARAM_USERNAME = "username";
+    public static final String PARAM_PASSWORD = "password";
+
+    private String mSearchFilter;
+    private String mBaseDN = GlobalConstant.BASE_DN;
+
+    //부호화
     public static final String PARAM_ENCRYPTION = "encryption";
     public static final String PARAM_AUTHTOKEN_TYPE = "authtokenType";
     public static final String PARAM_SEARCHFILTER = "searchFilter";
     public static final String PARAM_BASEDN = "baseDN";
     public static final String PARAM_MAPPING = "map_";
-
-    private String mSearchFilter;
-    private String mBaseDN;
-    private String mHost;
 
     private static final String TAG = "LoginActivity";
 
@@ -71,25 +70,24 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
     private String mAuthtoken;
     private String mAuthtokenType;
 
+    //사용자 조회위한 사용자 계정 , 사용자 계정 PW
+    private String mUserName = GlobalConstant.SECURITY_CREDENTIALS;
+    private String mUserPassword = GlobalConstant.SECURITY_CREDENTIALS_PASSWORD;
+
     private String mIbEmail;
     private EditText mIbEmailEdit;
     private String mIbPassword;
     private EditText mIbPasswordEdit;
     private Button mLoginBtn;
-    private String mFirstName;
-    private String mLastName;
 
     private int mEncryption;
     private int mPort;
+    private String mHost = GlobalConstant.PROVIDER_URL;
     private final int port = 389;
 
     private Dialog dialog;
     private String message;
 
-    //private LDAPConnection ldapConnection;
-
-    //LDAP Context
-    //LDAPCon context = null;
     private Context context = null;
 
     @Override
@@ -106,47 +104,26 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
         setContentView(R.layout.activity_login);
 
         mIbEmailEdit = (EditText) findViewById(R.id.et_email_id);
+        mIbEmailEdit.setText(mIbEmail);
         mIbPasswordEdit = (EditText) findViewById(R.id.et_password);
+        mIbPasswordEdit.setText(mIbPassword);
         mLoginBtn = (Button) findViewById(R.id.btn_login);
         mLoginBtn.setOnClickListener(this);
-
-
-        String email = mIbEmailEdit.getText().toString();
-        String password = mIbPasswordEdit.getText().toString();
-
-        String path = String.format(GlobalConstant.PROVIDER_URL, GlobalConstant.INITIAL_CONTEXT_FACTORY);
-        String filterString = "(CN=LDAP)";
 
 
     }
 
     @Override
     public void onClick(View v) {
-
-        Properties env = new Properties();
-        env.put(GlobalConstant.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(GlobalConstant.PROVIDER_URL, "ldap://infoad01.infobank.net:389");
-        env.put(GlobalConstant.SECURITY_PRINCIPAL,
-                "CN=LDAP,OU=Server,OU=Service,DC=infobank,DC=net");
-        env.put(GlobalConstant.SECURITY_CREDENTIALS, "P@ssword11");
-        env.put("java.naming.ldap.version", "3");
-
         // 여기서 저정보들을 연결할때 넘긴다?
+        saveAccount(v);
+        getLDAPServerDetails(v);
 
-        LDAPConnection conn = new LDAPConnection();
-        try {
+        // 메인으로
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        this.finish();
 
-            //context = new InitialDirContext(env);
-            //SearchControls searcher = new SearchControls();
-
-            conn.connect(GlobalConstant.PROVIDER_URL, port);
-            //connection.connect(3, GlobalConstant.PROVIDER_URL, port,
-            //GlobalConstant.SECURITY_PRINCIPAL, GlobalConstant.SECURITY_CREDENTIALS);
-//            LDAPTestUtils.au
-
-        } catch (LDAPException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -154,10 +131,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
      */
     private void setLDAPMappings() {
         if (mRequestNewAccount) {
-            // mSearchFilter = "(objectClass=inetOrgPerson)";
-            mSearchFilter = "(objectClass=organizationalPerson)";
-            mFirstName = "givenName";
-            mLastName = "sn";
+             mSearchFilter = "(objectClass=inetOrgPerson)";
+             mSearchFilter = "(objectClass=organizationalPerson)";
             mIbEmail = "mail";
         }
     }
@@ -167,9 +142,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
      */
     private void getDataFromIntent() {
         final Intent intent = getIntent();
-        //mPassword = intent.getStringExtra(PARAM_PASSWORD);
-        mIbEmail = intent.getStringExtra(PARAM_USEREMAIL);
-        mIbPassword = intent.getStringExtra(PARAM_PASSWORD);
+        mUserName = intent.getStringExtra(PARAM_USERNAME);
+        mUserPassword = intent.getStringExtra(PARAM_PASSWORD);
         mHost = intent.getStringExtra(PARAM_HOST);
         mPort = intent.getIntExtra(PARAM_PORT, 389);
         mEncryption = intent.getIntExtra(PARAM_ENCRYPTION, 0);
@@ -185,8 +159,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
      */
     protected void finishConfirmCredentials(boolean result) {
         Log.i(TAG, "finishConfirmCredentials()");
-        final Account account = new Account(GlobalConstant.PROVIDER_URL, Constants.ACCOUNT_TYPE);
-        mAccountManager.setPassword(account, mIbPassword);
+        final Account account = new Account(mHost, Constants.ACCOUNT_TYPE);
+        mAccountManager.setPassword(account, mUserPassword);
         final Intent intent = new Intent();
         intent.putExtra(AccountManager.KEY_BOOLEAN_RESULT, result);
         setAccountAuthenticatorResult(intent.getExtras());
@@ -204,28 +178,25 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
 
         if (mRequestNewAccount) {
             Bundle userData = new Bundle();
-            userData.putString(PARAM_USEREMAIL, mIbEmail);
+            userData.putString(PARAM_USERNAME, mUserName);
             userData.putString(PARAM_PORT, mPort + "");
             userData.putString(PARAM_HOST, mHost);
             userData.putString(PARAM_ENCRYPTION, mEncryption + "");
-            userData.putString(PARAM_SEARCHFILTER, mSearchFilter);
             userData.putString(PARAM_BASEDN, mBaseDN);
             // Mappings for LDAP data
             // Contact 파일 만들어야함
-            //userData.putString(PARAM_MAPPING + Contact.FIRSTNAME, mFirstName);
-            //userData.putString(PARAM_MAPPING + Contact.LASTNAME, mLastName);
-            //userData.putString(PARAM_MAPPING + Contact.MAIL, mIbEmail);
-            mAccountManager.addAccountExplicitly(account, mIbPassword, userData);
+            userData.putString(PARAM_MAPPING + Contact.MAIL, mIbEmail);
+            mAccountManager.addAccountExplicitly(account, mUserPassword, userData);
 
             // Set contacts sync for this account.
             ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true);
             // 주소록 가져오는것 같은데 필요 없을듯
             // ContactManager.makeGroupVisible(account.name, getContentResolver());
         } else {
-            mAccountManager.setPassword(account, mIbPassword);
+            mAccountManager.setPassword(account, mUserPassword);
         }
         final Intent intent = new Intent();
-        mAuthtoken = mIbPassword;
+        mAuthtoken = mUserPassword;
         intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, account.name);
         intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
         if (mAuthtokenType != null && mAuthtokenType.equals(Constants.AUTHTOKEN_TYPE)) {
@@ -243,15 +214,12 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
      */
     public void getLDAPServerDetails(View view) {
         Log.i(TAG, "handleLogin");
-
         try {
-
         } catch (NumberFormatException nfe) {
             Log.i(TAG, "No port given. Set port to 389");
             mPort = 389;
         }
-
-        LDAPServerInstance ldapServer = new LDAPServerInstance(mHost, mPort, mEncryption, mIbEmail, mIbPassword);
+        LDAPServerInstance ldapServer = new LDAPServerInstance(mHost, mPort, mEncryption, mUserName, mUserPassword);
 
         showDialog(PROGRESS_DIALOG);
         // Start authenticating...
@@ -269,22 +237,29 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
         Log.i(TAG, "onAuthenticationResult(" + result + ")");
         if (dialog != null) {
             dialog.dismiss();
+            //here??
+
         }
         this.message = message;
         showDialog(ERROR_DIALOG);
         Log.e(TAG, "onAuthenticationResult: failed to authenticate");
     }
+
     /**
      * Handles onClick event on the Done button. Saves the account with the account manager.
      *
-     * @param view
-     *            The Done button for which this method is invoked
+     * @param view The Done button for which this method is invoked
      */
     public void saveAccount(View view) {
-        String searchFilter = mSearchFilter;
-        String baseDN = mBaseDN;
-        String firstName = mFirstName;
-        String lastName = mLastName;
+//        String searchFilter = mSearchFilter;
+//        String baseDN = mBaseDN;
+
+        mIbEmail = mIbEmailEdit.getText().toString();
+        mIbPassword = mIbPasswordEdit.getText().toString();
+
+//        String path = String.format(GlobalConstant.PROVIDER_URL, GlobalConstant.INITIAL_CONTEXT_FACTORY);
+//        String filterString = "(CN=LDAP)";
+
 
         if (!mConfirmCredentials) {
             finishLogin();

@@ -72,14 +72,14 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			// use the account manager to request the credentials
 			authtoken = mAccountManager.blockingGetAuthToken(account, Constants.AUTHTOKEN_TYPE, true /* notifyAuthFailure */);
 			final String host = mAccountManager.getUserData(account, LoginActivity.PARAM_HOST);
-			final String useremail = mAccountManager.getUserData(account, LoginActivity.PARAM_USEREMAIL);
+			final String username = mAccountManager.getUserData(account, LoginActivity.PARAM_USERNAME);
 			final int port = Integer.parseInt(mAccountManager.getUserData(account, LoginActivity.PARAM_PORT));
 			final String sEnc = mAccountManager.getUserData(account, LoginActivity.PARAM_ENCRYPTION);
 			int encryption = 0;
 			if (!TextUtils.isEmpty(sEnc)) {
 				encryption = Integer.parseInt(sEnc);
 			}
-			LDAPServerInstance ldapServer = new LDAPServerInstance(host, port, encryption, useremail, authtoken);
+			LDAPServerInstance ldapServer = new LDAPServerInstance(host, port, encryption, username, authtoken);
 
 			final String searchFilter = mAccountManager.getUserData(account, LoginActivity.PARAM_SEARCHFILTER);
 			final String baseDN = mAccountManager.getUserData(account, LoginActivity.PARAM_BASEDN);

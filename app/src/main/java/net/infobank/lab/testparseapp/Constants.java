@@ -26,12 +26,12 @@ public class Constants {
 	/**
 	 * Account type string.
 	 */
-	public static final String ACCOUNT_TYPE = "de.danielweisser.android.ldapsync";
+	public static final String ACCOUNT_TYPE = "net.infobank.lab.testparseapp";
 
 	/**
 	 * Authtoken type string.
 	 */
-	public static final String AUTHTOKEN_TYPE = "de.danielweisser.android.ldapsync";
+	public static final String AUTHTOKEN_TYPE = "net.infobank.lab.testparseapp";
 
 	/**
 	 * SD card LDAPSync folder.

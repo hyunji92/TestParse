@@ -81,9 +81,9 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
     private Button mLoginBtn;
 
     private int mEncryption;
-    private int mPort;
+
+    private int mPort = 389;
     private String mHost = GlobalConstant.PROVIDER_URL;
-    private final int port = 389;
 
     private Dialog dialog;
     private String message;
@@ -147,7 +147,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
         mHost = intent.getStringExtra(PARAM_HOST);
         mPort = intent.getIntExtra(PARAM_PORT, 389);
         mEncryption = intent.getIntExtra(PARAM_ENCRYPTION, 0);
-        mRequestNewAccount = (mIbEmail == null);
+        mRequestNewAccount = (mUserName == null);
         mConfirmCredentials = intent.getBooleanExtra(PARAM_CONFIRMCREDENTIALS, false);
     }
 

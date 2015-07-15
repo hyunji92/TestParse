@@ -33,7 +33,6 @@ import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchScope;
 
 import net.infobank.lab.testparseapp.LoginActivity;
-import net.infobank.lab.testparseapp.MainActivity;
 import net.infobank.lab.testparseapp.R;
 import net.infobank.lab.testparseapp.syncadapter.SyncService;
 
@@ -108,6 +107,13 @@ public class LDAPUtilities {
             connection = ldapServer.getConnection();
             SearchResult searchResult = connection.search(baseDN, SearchScope.SUB, searchFilter, getUsedAttributes(mappingBundle));
             Log.i(TAG, searchResult.getEntryCount() + " entries returned.");
+
+            SearchResult searchResults = connection.search("dc=example,dc=com", SearchScope.SUB, "(uid=john.doe)", "mail");
+            String mail = null;
+            if (searchResults.getEntryCount() > 0) {
+                SearchResultEntry entry = searchResults.getSearchEntries().get(0);
+                mail = entry.getAttributeValue("mail");
+            }
 
             for (SearchResultEntry e : searchResult.getSearchEntries()) {
                 Contact u = Contact.valueOf(e, mappingBundle);

@@ -71,8 +71,8 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
     private String mAuthtokenType;
 
     //사용자 조회위한 사용자 계정 , 사용자 계정 PW
-    private String mUserName = GlobalConstant.SECURITY_CREDENTIALS;
-    private String mUserPassword = GlobalConstant.SECURITY_CREDENTIALS_PASSWORD;
+    private String mUserName = GlobalConstant.SECURITY_PRINCIPAL;
+    private String mUserPassword = GlobalConstant.SECURITY_CREDENTIALS;
 
     private String mIbEmail;
     private EditText mIbEmailEdit;
@@ -96,7 +96,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
 
         mAccountManager = AccountManager.get(this);
 
-        getDataFromIntent();
+        //getDataFromIntent();
         setLDAPMappings();
 
 
@@ -124,6 +124,9 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
         startActivity(intent);
         this.finish();
 
+
+
+
     }
 
     /**
@@ -131,24 +134,10 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
      */
     private void setLDAPMappings() {
         if (mRequestNewAccount) {
-             mSearchFilter = "(objectClass=inetOrgPerson)";
+             // mSearchFilter = "(objectClass=inetOrgPerson)";
              mSearchFilter = "(objectClass=organizationalPerson)";
             mIbEmail = "mail";
         }
-    }
-
-    /**
-     * Obtains data from an intent that was provided for the activity. If no intent was provided some default values are set.
-     */
-    private void getDataFromIntent() {
-        final Intent intent = getIntent();
-        mUserName = intent.getStringExtra(PARAM_USERNAME);
-        mUserPassword = intent.getStringExtra(PARAM_PASSWORD);
-        mHost = intent.getStringExtra(PARAM_HOST);
-        mPort = intent.getIntExtra(PARAM_PORT, 389);
-        mEncryption = intent.getIntExtra(PARAM_ENCRYPTION, 0);
-        mRequestNewAccount = (mUserName == null);
-        mConfirmCredentials = intent.getBooleanExtra(PARAM_CONFIRMCREDENTIALS, false);
     }
 
     /**
@@ -174,7 +163,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
      */
     protected void finishLogin() {
         Log.i(TAG, "finishLogin()");
-        final Account account = new Account(GlobalConstant.PROVIDER_URL, Constants.ACCOUNT_TYPE);
+        final Account account = new Account(GlobalConstant.SECURITY_PRINCIPAL, Constants.ACCOUNT_TYPE);
 
         if (mRequestNewAccount) {
             Bundle userData = new Bundle();

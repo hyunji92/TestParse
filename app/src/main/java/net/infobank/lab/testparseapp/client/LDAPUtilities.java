@@ -101,24 +101,27 @@ public class LDAPUtilities {
      */
     public static List<Contact> fetchContacts(final LDAPServerInstance ldapServer, final String baseDN, final String searchFilter, final Bundle mappingBundle,
                                               final Date mLastUpdated, final Context context) {
-        final ArrayList<Contact> friendList = new ArrayList<Contact>();
+        //List<Contact>
+        final ArrayList<Contact> friendInfo = new ArrayList<Contact>();
         LDAPConnection connection = null;
+        String  mail = null;
         try {
             connection = ldapServer.getConnection();
             SearchResult searchResult = connection.search(baseDN, SearchScope.SUB, searchFilter, getUsedAttributes(mappingBundle));
             Log.i(TAG, searchResult.getEntryCount() + " entries returned.");
 
+            //메일만 걸러낸다
             SearchResult searchResults = connection.search("dc=example,dc=com", SearchScope.SUB, "(uid=john.doe)", "mail");
-            String mail = null;
             if (searchResults.getEntryCount() > 0) {
                 SearchResultEntry entry = searchResults.getSearchEntries().get(0);
                 mail = entry.getAttributeValue("mail");
             }
+            //
 
             for (SearchResultEntry e : searchResult.getSearchEntries()) {
                 Contact u = Contact.valueOf(e, mappingBundle);
                 if (u != null) {
-                    friendList.add(u);
+                    friendInfo.add(u);
                 }
             }
         } catch (LDAPException e) {
@@ -139,7 +142,7 @@ public class LDAPUtilities {
             }
         }
 
-        return friendList;
+        return friendInfo;
     }
 
     private static String[] getUsedAttributes(Bundle mappingBundle) {

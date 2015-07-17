@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import net.infobank.lab.testparseapp.client.Contact;
 import net.infobank.lab.testparseapp.client.LDAPServerInstance;
@@ -39,6 +40,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
     public static final String PARAM_PASSWORD = "password";
 
     private String mSearchFilter;
+    //= "DC=infobank,DC=net";
     private String mBaseDN = GlobalConstant.BASE_DN;
 
     //부호화
@@ -58,7 +60,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
     /**
      * If set we are just checking that the user knows their credentials, this doesn't cause the user's password to be changed on the device.
      */
-    private Boolean mConfirmCredentials = false;
+    private Boolean mConfirmCredentials = true;
 
     /**
      * for posting authentication attempts back to UI thread
@@ -80,12 +82,12 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
     private EditText mIbPasswordEdit;
     private Button mLoginBtn;
 
-    private int mEncryption;
+    private int mEncryption = 389;
 
     private int mPort = 389;
     private String mHost = GlobalConstant.PROVIDER_URL;
 
-    private Dialog dialog;
+    private Dialog dialog = null;
     private String message;
 
     private Context context = null;
@@ -120,11 +122,13 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
         getLDAPServerDetails(v);
 
         // 메인으로
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        this.finish();
-
-
+        if (dialog == null) {
+            Toast.makeText(context, "이건음....", Toast.LENGTH_SHORT).show();
+        } else {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            this.finish();
+        }
 
 
     }
@@ -134,8 +138,9 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
      */
     private void setLDAPMappings() {
         if (mRequestNewAccount) {
-             // mSearchFilter = "(objectClass=inetOrgPerson)";
+            //mSearchFilter = "(DC=infobank,DC=net)";
              mSearchFilter = "(objectClass=organizationalPerson)";
+
             mIbEmail = "mail";
         }
     }
@@ -163,7 +168,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
      */
     protected void finishLogin() {
         Log.i(TAG, "finishLogin()");
-        final Account account = new Account(GlobalConstant.SECURITY_PRINCIPAL, Constants.ACCOUNT_TYPE);
+        final Account account = new Account(mUserName, Constants.ACCOUNT_TYPE);
 
         if (mRequestNewAccount) {
             Bundle userData = new Bundle();
@@ -172,6 +177,7 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
             userData.putString(PARAM_HOST, mHost);
             userData.putString(PARAM_ENCRYPTION, mEncryption + "");
             userData.putString(PARAM_BASEDN, mBaseDN);
+            userData.putString(PARAM_SEARCHFILTER, mSearchFilter);
             // Mappings for LDAP data
             // Contact 파일 만들어야함
             userData.putString(PARAM_MAPPING + Contact.MAIL, mIbEmail);
@@ -226,12 +232,20 @@ public class LoginActivity extends AccountAuthenticatorActivity implements View.
         Log.i(TAG, "onAuthenticationResult(" + result + ")");
         if (dialog != null) {
             dialog.dismiss();
-            //here??
-
         }
-        this.message = message;
-        showDialog(ERROR_DIALOG);
-        Log.e(TAG, "onAuthenticationResult: failed to authenticate");
+        if (result) {
+//            if (baseDNs != null) {
+//                ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(this, android.R.layout.simple_spinner_item, baseDNs);
+//                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//                mBaseDNSpinner.setAdapter(adapter);
+//            }
+//            ViewFlipper vf = (ViewFlipper) findViewById(R.id.server);
+//            vf.showNext();
+        } else {
+            this.message = message;
+            showDialog(ERROR_DIALOG);
+            Log.e(TAG, "onAuthenticationResult: failed to authenticate");
+        }
     }
 
     /**

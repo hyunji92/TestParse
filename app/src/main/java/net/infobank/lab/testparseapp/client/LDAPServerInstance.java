@@ -158,7 +158,7 @@ public final class LDAPServerInstance implements Serializable {
 	public String toString() {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("LDAPServer(host=\"");
-		buffer.append(host).append(":").append(port).append("/");
+		buffer.append(host).append(":").append(port).append("\"");
 		buffer.append(", bindDN=\"");
 		if (bindDN != null) {
 			buffer.append(bindDN);
